@@ -359,11 +359,15 @@ class HTTPRequest(object):
         self.body = body
 
     def __str__(self):
-        # ddzialak:
-        params = self.params and six.urllib.urlencode(self.params) or ""
-        return (('%s %s://%s:%s%s%s %s') % (self.method,
-                 self.protocol, self.host, self.port, self.path, params,
-                 boto.utils.tuples_to_str(self.headers.items())))
+        # ddzialak: I did use six.urllib.urlencode because this function is used to debug only
+        if self.params:
+            params = "?" + "&".join(lambda t: "%s=%s" % t, self.params.items())
+        else:
+            params = ""
+        show_port = self.host.endswith(str(self.port)) and "" or ":%s" % self.port
+        uri = "%s://%s%s%s%s" % (self.protocol, self.host, show_port, self.path, params)
+        headers = boto.utils.tuples_to_str(self.headers.items())
+        return '%s %s\n%s' % (self.method, uri, headers)
 
     def authorize(self, connection, **kwargs):
         if not getattr(self, '_headers_quoted', False):
