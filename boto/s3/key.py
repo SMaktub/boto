@@ -825,6 +825,9 @@ class Key(object):
             else:
                 chunk = fp.read(self.BufferSize)
 
+
+            boto.utils.log_body(chunk, "body=")
+
             if not isinstance(chunk, bytes):
                 chunk = chunk.encode('utf-8')
 
@@ -978,7 +981,7 @@ class Key(object):
                 if self.etag != '"%s"' % md5:
                     raise provider.storage_data_error(
                         'ETag from S3 did not match computed MD5. '
-                        '%s vs. %s' % (self.etag, self.md5))
+                        '%s vs. "%s"' % (self.etag, md5))
 
             return True
 

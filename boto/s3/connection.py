@@ -596,7 +596,8 @@ class S3Connection(AWSAuthConnection):
             new key in S3.
 
         """
-        check_lowercase_bucketname(bucket_name)
+        if (location and not location.startswith("us-")):
+            check_lowercase_bucketname(bucket_name)
 
         if policy:
             if headers:
@@ -648,15 +649,15 @@ class S3Connection(AWSAuthConnection):
         if isinstance(key, Key):
             key = key.name
         path = self.calling_format.build_path_base(bucket, key)
-        boto.log.debug('path=%s' % path)
+        #boto.log.debug('path=%s' % path)
         auth_path = self.calling_format.build_auth_path(bucket, key)
-        boto.log.debug('auth_path=%s' % auth_path)
+        #boto.log.debug('auth_path=%s' % auth_path)
         host = self.calling_format.build_host(self.server_name(), bucket)
         if query_args:
             path += '?' + query_args
-            boto.log.debug('path=%s' % path)
+            #boto.log.debug('path=%s' % path)
             auth_path += '?' + query_args
-            boto.log.debug('auth_path=%s' % auth_path)
+            #boto.log.debug('auth_path=%s' % auth_path)
         return super(S3Connection, self).make_request(
             method, path, headers,
             data, host, auth_path, sender,

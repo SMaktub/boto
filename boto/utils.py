@@ -1049,3 +1049,18 @@ class RequestHook(object):
     """
     def handle_request_data(self, request, response, error=False):
         pass
+
+
+def tuples_to_str(headers):
+    res = map(lambda (k,v): "%s=%s" % (k, repr(v)), headers)
+    res.append('\n\n')
+    return '\n'.join(res)
+
+
+def log_body(body, title="body:"):
+    max_body_len = boto.config.getint('Boto', 'max_body_log_length', 1024)
+    if max_body_len > 3:
+        body = body.rstrip()
+        if len(body) > max_body_len:
+            body = body[:max_body_len-3] + "..."
+        boto.log.debug("%s\n%s\n" % (title, body))

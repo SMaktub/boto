@@ -403,6 +403,9 @@ class Bucket(object):
             h = handler.XmlHandler(rs, self)
             if not isinstance(body, bytes):
                 body = body.encode('utf-8')
+                boto.utils.log_body(body, "RETRIEVED utf-8 body")
+            else:
+                boto.utils.log_body(body, "RETRIEVED ??? body")
             xml.sax.parseString(body, h)
             return rs
         else:

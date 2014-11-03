@@ -69,6 +69,7 @@ from boto.exception import PleaseRetryException
 from boto.provider import Provider
 from boto.resultset import ResultSet
 
+
 HAVE_HTTPS_CONNECTION = False
 try:
     import ssl
@@ -358,10 +359,11 @@ class HTTPRequest(object):
         self.body = body
 
     def __str__(self):
-        return (('method:(%s) protocol:(%s) host(%s) port(%s) path(%s) '
-                 'params(%s) headers(%s) body(%s)') % (self.method,
-                 self.protocol, self.host, self.port, self.path, self.params,
-                 self.headers, self.body))
+        # ddzialak:
+        params = self.params and six.urllib.urlencode(self.params) or ""
+        return (('%s %s://%s:%s%s%s %s') % (self.method,
+                 self.protocol, self.host, self.port, self.path, params,
+                 boto.utils.tuples_to_str(self.headers.items())))
 
     def authorize(self, connection, **kwargs):
         if not getattr(self, '_headers_quoted', False):
@@ -411,6 +413,9 @@ class HTTPResponse(http_client.HTTPResponse):
             return self._cached_response
         else:
             return http_client.HTTPResponse.read(self, amt)
+
+    def __str__(self):
+        return '%s %s\n%s' % (self.status, self.reason, boto.utils.tuples_to_str(self.getheaders()))
 
 
 class AWSAuthConnection(object):
@@ -894,13 +899,13 @@ class AWSAuthConnection(object):
         Google group by Larry Bates.  Thanks!
 
         """
-        boto.log.debug('Method: %s' % request.method)
-        boto.log.debug('Path: %s' % request.path)
-        boto.log.debug('Data: %s' % request.body)
-        boto.log.debug('Headers: %s' % request.headers)
-        boto.log.debug('Host: %s' % request.host)
-        boto.log.debug('Port: %s' % request.port)
-        boto.log.debug('Params: %s' % request.params)
+        # boto.log.debug('Method: %s' % request.method)
+        # boto.log.debug('Path: %s' % request.path)
+        # boto.log.debug('Data: %s' % request.body)
+        # boto.log.debug('Headers: %s' % request.headers)
+        # boto.log.debug('Host: %s' % request.host)
+        # boto.log.debug('Port: %s' % request.port)
+        # boto.log.debug('Params: %s' % request.params)
         response = None
         body = None
         e = None
@@ -932,8 +937,12 @@ class AWSAuthConnection(object):
                 if 's3' not in self._required_auth_capability():
                     if not getattr(self, 'anon', False):
                         self.set_host_header(request)
-                boto.log.debug('Final headers: %s' % request.headers)
+                #boto.log.debug('Final headers: %s' % request.headers)
                 request.start_time = datetime.now()
+                # ddzialak:
+                boto.log.info("REQUEST:: ===============>: %s" % str(request))
+                boto.utils.log_body(request.body)
+
                 if callable(sender):
                     response = sender(connection, request.method, request.path,
                                       request.body, request.headers)
@@ -941,7 +950,10 @@ class AWSAuthConnection(object):
                     connection.request(request.method, request.path,
                                        request.body, request.headers)
                     response = connection.getresponse()
-                boto.log.debug('Response headers: %s' % response.getheaders())
+
+                # ddzialak:
+                boto.log.info("RESPONSE: ===============>: %s" % str(response))
+                #boto.log.debug('Response headers: %s' % response.getheaders())
                 location = response.getheader('location')
                 # -- gross hack --
                 # http_client gets confused with chunked responses to HEAD requests
@@ -1064,6 +1076,7 @@ class AWSAuthConnection(object):
             params = {}
         http_request = self.build_base_http_request(method, path, auth_path,
                                                     params, headers, data, host)
+        #boto.log.warning("ddzialak %s", data)
         return self._mexe(http_request, sender, override_num_retries,
                           retry_handler=retry_handler)
 

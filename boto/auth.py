@@ -141,7 +141,7 @@ class HmacAuthV1Handler(AuthHandler, HmacKeys):
         string_to_sign = boto.utils.canonical_string(method, auth_path,
                                                      headers, None,
                                                      self._provider)
-        boto.log.debug('StringToSign:\n%s' % string_to_sign)
+        boto.log.debug('StringToSign:\n%s' % repr(string_to_sign))
         b64_hmac = self.sign_string(string_to_sign)
         auth_hdr = self._provider.auth_header
         auth = ("%s %s:%s" % (auth_hdr, self._provider.access_key, b64_hmac))
@@ -268,7 +268,7 @@ class HmacAuthV3HTTPHandler(AuthHandler, HmacKeys):
         if self._provider.security_token:
             req.headers['X-Amz-Security-Token'] = self._provider.security_token
         string_to_sign, headers_to_sign = self.string_to_sign(req)
-        boto.log.debug('StringToSign:\n%s' % string_to_sign)
+        #boto.log.debug('StringToSign:\n%s' % string_to_sign)
         hash_value = sha256(string_to_sign.encode('utf-8')).digest()
         b64_hmac = self.sign_string(hash_value)
         s = "AWS3 AWSAccessKeyId=%s," % self._provider.access_key
@@ -526,7 +526,7 @@ class HmacAuthV4Handler(AuthHandler, HmacKeys):
         canonical_request = self.canonical_request(req)
         boto.log.debug('CanonicalRequest:\n%s' % canonical_request)
         string_to_sign = self.string_to_sign(req, canonical_request)
-        boto.log.debug('StringToSign:\n%s' % string_to_sign)
+        #boto.log.debug('StringToSign:\n%s' % string_to_sign)
         signature = self.signature(req, string_to_sign)
         boto.log.debug('Signature:\n%s' % signature)
         headers_to_sign = self.headers_to_sign(req)
