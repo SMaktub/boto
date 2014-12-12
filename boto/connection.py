@@ -364,7 +364,7 @@ class HTTPRequest(object):
             params = "?" + "&".join(lambda t: "%s=%s" % t, self.params.items())
         else:
             params = ""
-        show_port = self.host.endswith(str(self.port)) and "" or ":%s" % self.port
+        show_port = "" if self.host.endswith(str(self.port)) else ":%s" % self.port
         uri = "%s://%s%s%s%s" % (self.protocol, self.host, show_port, self.path, params)
         headers = boto.utils.tuples_to_str(self.headers.items())
         return '%s %s\n%s' % (self.method, uri, headers)
