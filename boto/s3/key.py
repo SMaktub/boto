@@ -904,6 +904,8 @@ class Key(object):
         if find_matching_headers('Content-Language', headers):
             self.content_language = merge_headers_by_name(
                 'Content-Language', headers)
+        if self.content_type is None:
+            self.content_type = self.DefaultContentType
         content_type_headers = find_matching_headers('Content-Type', headers)
         if content_type_headers:
             # Some use cases need to suppress sending of the Content-Type
@@ -919,8 +921,6 @@ class Key(object):
                     'Content-Type', headers)
         elif self.path:
             self.content_type = mimetypes.guess_type(self.path)[0]
-            if self.content_type is None:
-                self.content_type = self.DefaultContentType
             headers['Content-Type'] = self.content_type
         else:
             headers['Content-Type'] = self.content_type

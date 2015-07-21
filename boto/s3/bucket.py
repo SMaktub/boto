@@ -405,8 +405,14 @@ class Bucket(object):
                 body = body.encode('utf-8')
                 boto.utils.log_body(body, "RETRIEVED utf-8 body")
             else:
-                boto.utils.log_body(body, "RETRIEVED ??? body")
-            xml.sax.parseString(body, h)
+                boto.utils.log_body(body, "RETRIEVED <str> body")
+            #import HTMLParser
+            #p = HTMLParser.HTMLParser()
+            #data = unicode(p.unescape(body))
+            data = body
+            print "body: ", data
+            xml.sax.parseString(data, h)
+            # body.replace("&#", ";entity:"), h)
             return rs
         else:
             raise self.connection.provider.storage_response_error(
