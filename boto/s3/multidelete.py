@@ -118,7 +118,7 @@ class MultiDeleteResult(object):
     """
 
     def __init__(self, bucket=None):
-        self.bucket = None
+        self.bucket = bucket
         self.deleted = []
         self.errors = []
 

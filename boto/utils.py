@@ -1060,7 +1060,10 @@ def tuples_to_str(headers):
 def log_body(body, title="body:"):
     max_body_len = boto.config.getint('Boto', 'max_body_log_length', 1024)
     if max_body_len > 3:
-        body = body.rstrip()
-        if len(body) > max_body_len:
-            body = body[:max_body_len-3] + "..."
-        boto.log.debug("%s\n%s\n" % (title, body))
+        try:
+            body = body.rstrip()
+            if len(body) > max_body_len:
+                body = body[:max_body_len-3] + "..."
+            boto.log.debug("%s\n%s\n" % (title, body))
+        except AttributeError, ex:
+            boto.log.debug("%s can not log %s\n" % (title, ex))
