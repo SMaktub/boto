@@ -119,6 +119,7 @@ class Key(object):
         self._storage_class = None
         self.path = None
         self.resp = None
+        self.sender_http_conn = None
         self.mode = None
         self.size = None
         self.version_id = None
@@ -764,6 +765,7 @@ class Key(object):
         digesters = dict((alg, hash_algs[alg]()) for alg in hash_algs or {})
 
         def sender(http_conn, method, path, data, headers):
+            self.sender_http_conn = http_conn
             # This function is called repeatedly for temporary retries
             # so we must be sure the file pointer is pointing at the
             # start of the data.
@@ -953,6 +955,7 @@ class Key(object):
         )
         self.handle_version_headers(resp, force=True)
         self.handle_addl_headers(resp.getheaders())
+        self.sender_http_conn = None
 
     def should_retry(self, response, chunked_transfer=False):
         provider = self.bucket.connection.provider
